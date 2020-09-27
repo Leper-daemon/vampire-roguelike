@@ -46,7 +46,11 @@ def new_game() -> Engine:
     engine.update_fov()
 
     engine.message_log.add_message(
-        "Hello and welcome, adventurer, to yet another dungeon!", color.welcome_text
+        "You have awoken after centuries to find your castle claimed by a rival.", color.welcome_text
+    )
+
+    engine.message_log.add_message(
+        "Take back your throne!", color.welcome_text
     )
 
     dagger = copy.deepcopy(entity_factories.dagger)
@@ -96,7 +100,7 @@ class MainMenu(input_handlers.BaseEventHandler):
 
         menu_width = 24
         for i, text in enumerate(
-            ["[N] Play a new game", "[C] Continue last game", "[Q] Quit"]
+            ["[N] New Game", "[C] Continue", "[Q] Quit"]
         ):
             console.print(
                 console.width // 2,

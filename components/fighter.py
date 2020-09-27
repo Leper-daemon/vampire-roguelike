@@ -13,15 +13,21 @@ if TYPE_CHECKING:
 class Fighter(BaseComponent):
     parent: Actor
 
-    def __init__(self, hp: int, base_defense: int, base_power: int):
+    def __init__(self, hp: int, bp: int, base_defense: int, base_power: int):
         self.max_hp = hp
         self._hp = hp
+        self.max_bp = bp
+        self._bp = bp
         self.base_defense = base_defense
         self.base_power = base_power
 
     @property
     def hp(self) -> int:
         return self._hp
+
+    @property
+    def bp(self) -> int:
+        return self._bp
 
     @property
     def defense(self) -> int:
@@ -51,9 +57,13 @@ class Fighter(BaseComponent):
         if self._hp == 0 and self.parent.ai:
             self.die()
 
+    @bp.setter
+    def bp(self, value: int) -> None:
+        self._bp = max(0, min(value, self.max_bp))
+
     def die(self) -> None:
         if self.engine.player is self.parent:
-            death_message = "You died!"
+            death_message = "You met the true death!"
             death_message_color = color.player_die
         else:
             death_message = f"{self.parent.name} is dead!"
@@ -70,7 +80,7 @@ class Fighter(BaseComponent):
 
         self.engine.player.level.add_xp(self.parent.level.xp_given)
 
-    def heal(self, amount: int) -> int:
+    def heal_hp(self, amount: int) -> int:
         if self.hp == self.max_hp:
             return 0
 
@@ -85,5 +95,23 @@ class Fighter(BaseComponent):
 
         return amount_recovered
 
-    def take_damage(self, amount: int) -> None:
+    def take_damage_hp(self, amount: int) -> None:
         self.hp -= amount
+
+    def heal_bp(self, amount: int) -> int:
+        if self.bp == self.max_bp:
+            return 0
+
+        new_hp_value = self.bp + amount
+
+        if new_hp_value > self.max_bp:
+            new_hp_value = self.max_bp
+
+        amount_recovered = new_hp_value - self.bp
+
+        self.bp = new_hp_value
+
+        return amount_recovered
+
+    def take_damage_bp(self, amount: int) -> None:
+        self.bp -= amount
