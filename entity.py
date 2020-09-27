@@ -154,7 +154,6 @@ class Item(Entity):
         )
 
         self.consumable = consumable
-        self.consumable.parent = self
 
         if self.consumable:
             self.consumable.parent = self
