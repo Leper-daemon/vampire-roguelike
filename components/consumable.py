@@ -92,6 +92,24 @@ class HealingConsumable(Consumable):
             raise Impossible(f"Your health is already full.")
 
 
+class BloodConsumable(Consumable):
+    def __init__(self, amount: int):
+        self.amount = amount
+
+    def activate(self, action: actions.ItemAction) -> None:
+        consumer = action.entity
+        amount_recovered = consumer.fighter.heal_bp(self.amount)
+
+        if amount_recovered > 0:
+            self.engine.message_log.add_message(
+                f"You consume the {self.parent.name}, and recover {amount_recovered} BP!",
+                color.blood_recovered,
+            )
+            self.consume()
+        else:
+            raise Impossible(f"Your blood pool is already full.")
+
+
 class FireballDamageConsumable(Consumable):
     def __init__(self, damage: int, radius: int):
         self.damage = damage

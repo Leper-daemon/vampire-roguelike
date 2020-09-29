@@ -1,10 +1,11 @@
 from components.ai import HostileEnemy
-from components import consumable, equippable
+from components import consumable, equippable, spell
 from components.equipment import Equipment
 from components.fighter import Fighter
 from components.inventory import Inventory
+from components.ability_menu import Ability_Menu
 from components.level import Level
-from entity import Actor, Item
+from entity import Actor, Item, Ability
 
 player = Actor(
     char="@",
@@ -15,6 +16,7 @@ player = Actor(
     fighter=Fighter(hp=30, bp=10, base_defense=1, base_power=2),
     inventory=Inventory(capacity=26),
     level=Level(level_up_base=200),
+    ability_menu=Ability_Menu(capacity=26)
 )
 
 orc = Actor(
@@ -26,6 +28,7 @@ orc = Actor(
     fighter=Fighter(hp=30, bp=5, base_defense=1, base_power=2),
     inventory=Inventory(capacity=0),
     level=Level(xp_given=35),
+    ability_menu=Ability_Menu(capacity=0)
 )
 
 troll = Actor(
@@ -37,6 +40,7 @@ troll = Actor(
     fighter=Fighter(hp=16, bp=10, base_defense=1, base_power=4),
     inventory=Inventory(capacity=0),
     level=Level(xp_given=100),
+    ability_menu=Ability_Menu(capacity=0)
 )
 
 confusion_scroll = Item(
@@ -58,6 +62,13 @@ health_potion = Item(
     color=(127, 0, 255),
     name="Health Potion",
     consumable=consumable.HealingConsumable(amount=4),
+)
+
+blood_potion = Item(
+    char="!",
+    color=(255, 0, 0),
+    name="Bottled Blood",
+    consumable=consumable.BloodConsumable(amount=4),
 )
 
 lightning_scroll = Item(
@@ -84,4 +95,11 @@ leather_armor = Item(
 
 chain_mail = Item(
     char="[", color=(139, 69, 19), name="Chain Mail", equippable=equippable.ChainMail()
+)
+
+health_spell = Ability(
+    char="!",
+    color=(255, 0, 0),
+    name="Blood Heal",
+    spell=spell.HealingSpell(amount=4),
 )

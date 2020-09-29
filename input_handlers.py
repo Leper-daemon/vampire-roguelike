@@ -18,7 +18,7 @@ import exceptions
 
 if TYPE_CHECKING:
     from engine import Engine
-    from entity import Item
+    from entity import Item, Ability
 
 
 MOVE_KEYS = {
@@ -306,6 +306,83 @@ class LevelUpEventHandler(AskUserEventHandler):
         return None
 
 
+class Ability_MenuEventHandler(AskUserEventHandler):
+    """This handler lets the user select an ability.
+
+    What happens then depends on the subclass.
+    """
+
+    TITLE = "<missing title>"
+
+    def on_render(self, console: tcod.Console) -> None:
+        """Render an ability menu, which displays the spells in the ability menu, and the letter to select them.
+        Will move to a different position based on where the player is located, so the player can always see where
+        they are.
+        """
+        super().on_render(console)
+        number_of_abilities_in_ability_menu = len(self.engine.player.ability_menu.abilities)
+
+        height = number_of_abilities_in_ability_menu + 2
+
+        if height <= 3:
+            height = 3
+
+        if self.engine.player.x <= 30:
+            x = 40
+        else:
+            x = 0
+
+        y = 0
+
+        width = len(self.TITLE) + 4
+
+        console.draw_frame(
+            x=x,
+            y=y,
+            width=width,
+            height=height,
+            title=self.TITLE,
+            clear=True,
+            fg=(255, 255, 255),
+            bg=(0, 0, 0),
+        )
+
+        if number_of_abilities_in_ability_menu > 0:
+            for i, item in enumerate(self.engine.player.ability_menu.abilities):
+                item_key = chr(ord("a") + i)
+                console.print(x + 1, y + i + 1, f"({item_key}) {item.name}")
+        else:
+            console.print(x + 1, y + 1, "(Empty)")
+
+    def ev_keydown(self, event: tcod.event.KeyDown) -> Optional[Action]:
+        player = self.engine.player
+        key = event.sym
+        index = key - tcod.event.K_a
+
+        if 0 <= index <= 26:
+            try:
+                selected_ability = player.ability_menu.abilities[index]
+            except IndexError:
+                self.engine.message_log.add_message("Invalid entry.", color.invalid)
+                return None
+            return self.on_ability_selected(selected_ability)
+        return super().ev_keydown(event)
+
+    def on_ability_selected(self, ability: Ability) -> Optional[Action]:
+        """Called when the user selects a valid item."""
+        raise NotImplementedError()
+
+
+class Ability_MenuActivateHandler(Ability_MenuEventHandler):
+    """Handle using an ability."""
+
+    TITLE = "Select an ability to use"
+
+    def on_ability_selected(self, ability: Ability) -> Optional[Action]:
+        """Return the action for the selected item."""
+        return ability.spell.get_action(self.engine.player)
+
+
 class InventoryEventHandler(AskUserEventHandler):
     """This handler lets the user select an item.
 
@@ -543,6 +620,9 @@ class MainGameEventHandler(EventHandler):
 
         elif key == tcod.event.K_g:
             action = PickupAction(player)
+
+        elif key == tcod.event.K_z:
+            return Ability_MenuActivateHandler(self.engine)
 
         elif key == tcod.event.K_i:
             return InventoryActivateHandler(self.engine)

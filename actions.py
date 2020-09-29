@@ -189,3 +189,24 @@ class BumpAction(ActionWithDirection):
 
         else:
             return MovementAction(self.entity, self.dx, self.dy).perform()
+
+
+class AbilityAction(Action):
+    def __init__(
+        self, entity: Actor, ability: Ability, target_xy: Optional[Tuple[int, int]] = None
+    ):
+        super().__init__(entity)
+        self.ability = ability
+        if not target_xy:
+            target_xy = entity.x, entity.y
+        self.target_xy = target_xy
+
+    @property
+    def target_actor(self) -> Optional[Actor]:
+        """Return the actor at this actions destination."""
+        return self.engine.game_map.get_actor_at_location(*self.target_xy)
+
+    def perform(self) -> None:
+        """Invoke the ability, this action will be given to provide context."""
+        if self.ability.spell:
+            self.ability.spell.activate(self)

@@ -14,6 +14,7 @@ if TYPE_CHECKING:
     from components.fighter import Fighter
     from components.inventory import Inventory
     from components.level import Level
+    from components.spell import Spell
     from game_map import GameMap
 
 T = TypeVar("T", bound="Entity")
@@ -100,6 +101,7 @@ class Actor(Entity):
         fighter: Fighter,
         inventory: Inventory,
         level: Level,
+        ability_menu: Ability_Menu,
     ):
         super().__init__(
             x=x,
@@ -121,6 +123,9 @@ class Actor(Entity):
 
         self.inventory = inventory
         self.inventory.parent = self
+
+        self.ability_menu = ability_menu
+        self.ability_menu.parent = self
 
         self.level = level
         self.level.parent = self
@@ -162,3 +167,27 @@ class Item(Entity):
 
         if self.equippable:
             self.equippable.parent = self
+
+class Ability(Entity):
+    def __init__(
+        self,
+        *,
+        x: int = 0,
+        y: int = 0,
+        char: str = "?",
+        color: Tuple[int, int, int] = (255, 255, 255),
+        name: str = "<Unnamed>",
+        spell: Spell,
+    ):
+        super().__init__(
+            x=x,
+            y=y,
+            char=char,
+            color=color,
+            name=name,
+            blocks_movement=False,
+            render_order=RenderOrder.ITEM,
+        )
+
+        self.spell = spell
+        self.spell.parent = self
